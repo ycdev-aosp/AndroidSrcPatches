@@ -1,0 +1,77 @@
+diff --git a/common/src/com/android/SdkConstants.java b/common/src/com/android/SdkConstants.java
+index 8c798c8..2ca2411 100644
+--- a/common/src/com/android/SdkConstants.java
++++ b/common/src/com/android/SdkConstants.java
+@@ -943,11 +943,13 @@ public final class SdkConstants {
+ 
+     // Java References
+     public static final String ATTR_REF_PREFIX = "?attr/";               //$NON-NLS-1$
+-    public static final String R_PREFIX = "R.";                          //$NON-NLS-1$
+-    public static final String R_ID_PREFIX = "R.id.";                    //$NON-NLS-1$
+-    public static final String R_LAYOUT_RESOURCE_PREFIX = "R.layout.";            //$NON-NLS-1$
+-    public static final String R_DRAWABLE_PREFIX = "R.drawable.";        //$NON-NLS-1$
+-    public static final String R_ATTR_PREFIX = "R.attr.";                //$NON-NLS-1$
++    public static final String R_PREFIX_NO_DOT = "Res";                    //$NON-NLS-1$
++    public static final String R_PREFIX = "Res.";                          //$NON-NLS-1$
++    public static final String R_ID_PREFIX = "Res.id.";                    //$NON-NLS-1$
++    public static final String R_LAYOUT_RESOURCE_PREFIX = "Res.layout.";            //$NON-NLS-1$
++    public static final String R_DRAWABLE_PREFIX = "Res.drawable.";        //$NON-NLS-1$
++    public static final String R_ATTR_PREFIX = "Res.attr.";                //$NON-NLS-1$
++    public static final String R_STYLE_PREFIX = "Res.style";               //$NON-NLS-1$
+ 
+     // Attributes related to tools
+     public static final String ATTR_IGNORE = "ignore";                   //$NON-NLS-1$
+diff --git a/lint/libs/lint_api/src/com/android/tools/lint/client/api/JavaVisitor.java b/lint/libs/lint_api/src/com/android/tools/lint/client/api/JavaVisitor.java
+index b1d8832..b544aeb 100644
+--- a/lint/libs/lint_api/src/com/android/tools/lint/client/api/JavaVisitor.java
++++ b/lint/libs/lint_api/src/com/android/tools/lint/client/api/JavaVisitor.java
+@@ -17,7 +17,7 @@
+ package com.android.tools.lint.client.api;
+ 
+ import static com.android.SdkConstants.ANDROID_PKG;
+-import static com.android.SdkConstants.R_CLASS;
++import static com.android.SdkConstants.R_PREFIX_NO_DOT;
+ 
+ import com.android.annotations.NonNull;
+ import com.android.tools.lint.detector.api.Detector;
+@@ -1125,7 +1125,7 @@ public class JavaVisitor {
+                     Select select = (Select) node.astOperand();
+                     if (select.astOperand() instanceof VariableReference) {
+                         VariableReference reference = (VariableReference) select.astOperand();
+-                        if (reference.astIdentifier().astValue().equals(R_CLASS)) {
++                        if (reference.astIdentifier().astValue().equals(R_PREFIX_NO_DOT)) {
+                             String type = select.astIdentifier().astValue();
+                             String name = node.astIdentifier().astValue();
+ 
+@@ -1147,7 +1147,7 @@ public class JavaVisitor {
+                 }
+ 
+                 // Arbitrary packages -- android.R.type.name, foo.bar.R.type.name
+-                if (node.astIdentifier().astValue().equals(R_CLASS)) {
++                if (node.astIdentifier().astValue().equals(R_PREFIX_NO_DOT)) {
+                     Node parent = node.getParent();
+                     if (parent instanceof Select) {
+                         Node grandParent = parent.getParent();
+diff --git a/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java b/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
+index 1b4163e..36a6fea 100644
+--- a/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
++++ b/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
+@@ -31,6 +31,7 @@ import static com.android.SdkConstants.R_ATTR_PREFIX;
+ import static com.android.SdkConstants.R_CLASS;
+ import static com.android.SdkConstants.R_ID_PREFIX;
+ import static com.android.SdkConstants.R_PREFIX;
++import static com.android.SdkConstants.R_STYLE_PREFIX;
+ import static com.android.SdkConstants.TAG_ARRAY;
+ import static com.android.SdkConstants.TAG_ITEM;
+ import static com.android.SdkConstants.TAG_PLURALS;
+@@ -208,8 +209,8 @@ public class UnusedResourceDetector extends ResourceXmlDetector implements Detec
+             List<String> styles = new ArrayList<String>();
+             for (String resource : unused) {
+                 // R.style.x, R.styleable.x, R.attr
+-                if (resource.startsWith("R.style")          //$NON-NLS-1$
+-                        || resource.startsWith("R.attr")) { //$NON-NLS-1$
++                if (resource.startsWith(R_STYLE_PREFIX)          //$NON-NLS-1$
++                        || resource.startsWith(R_ATTR_PREFIX)) { //$NON-NLS-1$
+                     styles.add(resource);
+                 }
+             }
