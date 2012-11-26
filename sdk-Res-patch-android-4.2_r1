@@ -53,7 +53,7 @@ index b1d8832..b544aeb 100644
                      if (parent instanceof Select) {
                          Node grandParent = parent.getParent();
 diff --git a/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java b/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
-index 1b4163e..36a6fea 100644
+index 1b4163e..e873dc8 100644
 --- a/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
 +++ b/lint/libs/lint_checks/src/com/android/tools/lint/checks/UnusedResourceDetector.java
 @@ -31,6 +31,7 @@ import static com.android.SdkConstants.R_ATTR_PREFIX;
@@ -75,3 +75,14 @@ index 1b4163e..36a6fea 100644
                      styles.add(resource);
                  }
              }
+@@ -255,8 +256,8 @@ public class UnusedResourceDetector extends ResourceXmlDetector implements Detec
+                     // in that case we can figure out the filename since it has a simple mapping
+                     // from the resource name (though the presence of qualifiers like -land etc
+                     // makes it a little tricky if there's no base file provided)
+-                    int secondDot = resource.indexOf('.', 2);
+-                    String typeName = resource.substring(2, secondDot); // 2: Skip R.
++                    int secondDot = resource.indexOf('.', 4);
++                    String typeName = resource.substring(4, secondDot); // 2: Skip Res.
+                     ResourceType type = ResourceType.getEnum(typeName);
+                     if (type != null && LintUtils.isFileBasedResourceType(type)) {
+                         String name = resource.substring(secondDot + 1);
